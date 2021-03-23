@@ -1,3 +1,4 @@
+import { error } from "node:console"
 import { createContext, ReactNode, useContext, useState } from "react"
 import { toast } from "react-toastify"
 import { api } from "../services/api"
@@ -40,6 +41,11 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   const addProduct = async (productId: number) => {
     try {
       // TODO
+
+      //check stock amount
+      const stock = await api.get<Stock>(`/stock/${productId}`)
+
+      //product to add
       const productInCard = cart.find((product) => product.id === productId)
 
       if (!productInCard) {
@@ -48,21 +54,35 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
           setCart([...cart, productAmount])
         })
       } else {
+        if (stock.data.amount <= productInCard.amount) {
+          toast.error("Quantidade solicitada fora de estoque")
+          return
+        }
         productInCard.amount += 1
-        setCart([...cart, productInCard])
+        const newProductAmount = cart.map((product) => {
+          if (product.id === productId) {
+            product = { ...productInCard }
+          }
+          return product
+        })
 
-        //setCart(productAmount)
+        setCart(newProductAmount)
       }
     } catch {
       // TODO
+
+      toast.error("Erro na adição do produto")
     }
   }
 
   const removeProduct = (productId: number) => {
     try {
       // TODO
+      const newCart = cart.filter((product) => product.id !== productId)
+      setCart(newCart)
     } catch {
       // TODO
+      toast.error("Erro na remoção do produto")
     }
   }
 
@@ -72,8 +92,23 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
   }: UpdateProductAmount) => {
     try {
       // TODO
+      const stock = await api.get<Stock>(`/stock/${productId}`)
+      if (stock.data.amount <= amount) {
+        toast.error("Quantidade solicitada fora de estoque")
+        return
+      }
+
+      const updateCard = cart.map((product) => {
+        if (product.id === productId) {
+          product.amount = amount
+        }
+        return product
+      })
+      setCart(updateCard)
     } catch {
       // TODO
+
+      toast.error("Erro na alteração de quantidade do produto")
     }
   }
 
