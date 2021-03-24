@@ -76,16 +76,12 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
         )
       }
     } catch {
-      // TODO
-
       toast.error("Erro na adição do produto")
     }
   }
 
   const removeProduct = (productId: number) => {
     try {
-      // TODO
-
       const productInCard = cart.some((product) => product.id === productId)
 
       if (!productInCard) {
@@ -98,7 +94,6 @@ export function CartProvider({ children }: CartProviderProps): JSX.Element {
 
       localStorage.setItem("@RocketShoes:cart", JSON.stringify(newCart))
     } catch {
-      // TODO
       toast.error("Erro na remoção do produto")
     }
   }
